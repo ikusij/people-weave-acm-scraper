@@ -172,7 +172,7 @@ source venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
-#### In Mac
+### In Mac
 
 ```bash
 python3 -m venv venv
@@ -191,7 +191,7 @@ Once we've setup the repository correctly, run the following command
 python main.py
 ```
 
-#### In Mac
+### In Mac
 
 ```bash
 python3 main.py
