@@ -4,12 +4,25 @@ import json
 import re
 
 def get_page(url: str) -> BeautifulSoup:
+
+    """
+    Helper function that GETS the data from the requested
+    url and returns a BeautifulSoup object of the parsed html
+    """
+
     page = requests.get(url)
     page.encoding = "utf-8"
     soup = BeautifulSoup(page.text, "html.parser")
     return soup
 
 def get_bibliometrics(soup: BeautifulSoup, json_object: dict) -> None:
+
+    """
+    Helper function that scrapes the bibliometric
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
 
     keys = ["pub_count", "available_for_download", "citation_count", "cum_downloads", "average_citations_per_article", "average_downloads_per_article"]
     bibliometrics = soup.select("div.bibliometrics__count")
@@ -22,6 +35,13 @@ def get_bibliometrics(soup: BeautifulSoup, json_object: dict) -> None:
         json_object[key] = int(bibliometric.text.strip().replace(",", ""))
 
 def get_upcoming(soup: BeautifulSoup, json_object: dict) -> None:
+
+    """
+    Helper function that scrapes the upcoming conferences
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
 
     name = soup.select_one("a.event__title")
     info = soup.select("div.info span")
@@ -38,6 +58,13 @@ def get_upcoming(soup: BeautifulSoup, json_object: dict) -> None:
     }
 
 def get_proceedings(soup: BeautifulSoup, json_object: dict) -> None:
+
+    """
+    Helper function that scrapes the proceedings
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
 
     json_object["proceedings"] = dict()
 
@@ -58,11 +85,24 @@ def get_proceedings(soup: BeautifulSoup, json_object: dict) -> None:
 
 def get_subject_areas(soup: BeautifulSoup, json_object: dict) -> None:
 
+    """
+    Helper function that scrapes the subject areas
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
+
     block = soup.find("div", attrs = { "data-tags": True })["data-tags"]
     subject_areas = re.findall("\"label\":\"(.*?)\"", block)
     json_object["subject_areas"] = subject_areas
 
 def get_dynamically_loaded(soup: BeautifulSoup, json_object: dict) -> None:
+
+    """
+    Helper function that requests the information for
+    the affiliations, authors, and awards sections 
+    to be scraped for the info.json file. 
+    """
 
     affiliations, authors = soup.find_all(attrs = { "data-ajaxurl": True })
 
@@ -74,6 +114,13 @@ def get_dynamically_loaded(soup: BeautifulSoup, json_object: dict) -> None:
     
 def get_affiliations(ajax: str, json_object: dict):
     
+    """
+    Helper function that scrapes the affiliation
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
+
     text = requests.get(f"https://dl.acm.org{ajax}").text
 
     data = re.findall("\"data\":\[(.*?)\]", text)[0]
@@ -94,6 +141,13 @@ def get_affiliations(ajax: str, json_object: dict):
         }
 
 def get_authors(ajax: str, json_object: dict):
+
+    """
+    Helper function that scrapes the author
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
 
     text = requests.get(f"https://dl.acm.org{ajax}").text
 
@@ -116,6 +170,13 @@ def get_authors(ajax: str, json_object: dict):
 
 def get_awards(ajax: str, json_object: dict):
 
+    """
+    Helper function that scrapes the award
+    information of a given conference. The data will 
+    be appended to the titles.json to create the 
+    info.json file as specified. 
+    """
+
     response = requests.get(f"https://dl.acm.org{ajax}&pbContext=%3Btaxonomy%3Ataxonomy%3Aconference-collections%3Bpage%3Astring%3AHome%3Bwgroup%3Astring%3AACM%20Publication%20Websites%3Bcsubtype%3Astring%3AConference%3Bctype%3Astring%3AConference%20Content%3Bwebsite%3Awebsite%3Adl-site%3Btopic%3Atopic%3Aconference-collections%3Easpdac%3BpageGroup%3Astring%3APublication%20Pages").text
     data = json.loads(response)
     
@@ -134,6 +195,12 @@ def get_awards(ajax: str, json_object: dict):
         }
 
 def main(abb: str, json_object: dict):
+
+    """
+    Wrapper function to get the necessary information 
+    for the info.json file and create it by appending
+    data to a copy of the titles.json file. 
+    """
 
     soup = get_page(f"https://dl.acm.org/conference/{abb}")
 
